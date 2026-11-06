@@ -1,0 +1,12 @@
+{
+  "apiVersion": "crd.projectcalico.org/v1",
+  "kind": "IPReservation",
+  "metadata": {
+    "name": "sdm-lab"
+  },
+  "spec": {
+    "reservedCIDRs": [
+      "10.244.194.67/32"
+    ]
+  }
+}

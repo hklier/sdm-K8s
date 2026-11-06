@@ -1,0 +1,5 @@
+*
+!Containerfile
+!entrypoint.sh
+!openssl-wrapper.sh
+!NNC90_5OracleLinux90_64bit.tar.gz

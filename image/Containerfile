@@ -1,0 +1,21 @@
+FROM docker.io/library/oraclelinux:9
+RUN dnf install -y apr apr-util pcre expat libuuid libxcrypt openssl openssl-libs \
+    libaio libstdc++ zlib unixODBC libXtst libXi libXrender alsa-lib \
+    fontconfig freetype net-tools iproute procps-ng hostname sudo shadow-utils \
+    tar gzip unzip which findutils util-linux openssh-clients iputils \
+    && dnf clean all \
+    && groupadd -g 1001 nncentral \
+    && useradd -u 1001 -g nncentral -m -s /bin/bash nncentral
+# Use only the original distribution archive, never a live database or host secrets.
+COPY NNC90_5OracleLinux90_64bit.tar.gz /tmp/sdm.tar.gz
+RUN mkdir -p /usr/share/sdm-seed /opt/AcmePacket \
+    && tar -xzf /tmp/sdm.tar.gz -C /usr/share/sdm-seed \
+    && rm /tmp/sdm.tar.gz
+COPY entrypoint.sh /usr/local/bin/sdm-entrypoint
+COPY openssl-wrapper.sh /opt/sdm-tools/openssl
+RUN chmod 755 /usr/local/bin/sdm-entrypoint /opt/sdm-tools/openssl
+ENV LANG=C.UTF-8
+EXPOSE 8443/tcp 162/udp
+WORKDIR /opt/AcmePacket/NNC90_5/bin
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["/usr/local/bin/sdm-entrypoint"]

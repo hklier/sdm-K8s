@@ -1,0 +1,17 @@
+.env
+*.log
+*.tar
+*.tar.gz
+*.tgz
+*.oci
+*.ppk
+*.key
+*.p12
+*.jks
+*.truststore
+*setup.properties
+*credential*
+*token*
+data/
+private/
+__pycache__/

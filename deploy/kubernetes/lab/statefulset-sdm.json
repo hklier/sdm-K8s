@@ -1,0 +1,150 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "StatefulSet",
+  "metadata": {
+    "name": "sdm",
+    "namespace": "sdm-lab",
+    "annotations": {
+      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+    }
+  },
+  "spec": {
+    "persistentVolumeClaimRetentionPolicy": {
+      "whenDeleted": "Retain",
+      "whenScaled": "Retain"
+    },
+    "podManagementPolicy": "OrderedReady",
+    "replicas": 1,
+    "revisionHistoryLimit": 10,
+    "selector": {
+      "matchLabels": {
+        "app": "sdm"
+      }
+    },
+    "serviceName": "sdm-headless",
+    "template": {
+      "metadata": {
+        "annotations": {
+          "cni.projectcalico.org/ipAddrs": "[\"10.244.194.67\"]"
+        },
+        "labels": {
+          "app": "sdm"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+          {
+            "args": [
+              "set -e\nulimit -n 65536\necho \"Open-file soft limit: $(ulimit -Sn)\"\nexec /usr/local/bin/sdm-entrypoint\n"
+            ],
+            "command": [
+              "/bin/bash",
+              "-ec"
+            ],
+            "image": "192.168.2.240:5000/sdm-lab@sha256:78edaf080feec31cfe163e57cbe768b96f6250915897b74ac77ce0d0f277aead",
+            "imagePullPolicy": "IfNotPresent",
+            "name": "sdm",
+            "ports": [
+              {
+                "containerPort": 8443,
+                "name": "https",
+                "protocol": "TCP"
+              },
+              {
+                "containerPort": 162,
+                "name": "snmp-traps",
+                "protocol": "UDP"
+              }
+            ],
+            "readinessProbe": {
+              "failureThreshold": 4,
+              "httpGet": {
+                "path": "/",
+                "port": "https",
+                "scheme": "HTTPS"
+              },
+              "periodSeconds": 15,
+              "successThreshold": 1,
+              "timeoutSeconds": 10
+            },
+            "resources": {
+              "limits": {
+                "cpu": "4",
+                "ephemeral-storage": "8Gi",
+                "memory": "32Gi"
+              },
+              "requests": {
+                "cpu": "4",
+                "ephemeral-storage": "1Gi",
+                "memory": "24Gi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": true,
+              "privileged": false,
+              "readOnlyRootFilesystem": false,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "startupProbe": {
+              "failureThreshold": 90,
+              "httpGet": {
+                "path": "/",
+                "port": "https",
+                "scheme": "HTTPS"
+              },
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "timeoutSeconds": 10
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "volumeMounts": [
+              {
+                "mountPath": "/opt/AcmePacket",
+                "name": "data"
+              },
+              {
+                "mountPath": "/run/secrets/sdm_setup",
+                "name": "setup",
+                "readOnly": true,
+                "subPath": "sdm_setup"
+              }
+            ]
+          }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "kubernetes.io/hostname": "k8s-worker1"
+        },
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {
+          "runAsGroup": 0,
+          "runAsUser": 0
+        },
+        "terminationGracePeriodSeconds": 180,
+        "volumes": [
+          {
+            "name": "data",
+            "persistentVolumeClaim": {
+              "claimName": "sdm-data"
+            }
+          },
+          {
+            "name": "setup",
+            "secret": {
+              "defaultMode": 256,
+              "secretName": "sdm-setup"
+            }
+          }
+        ]
+      }
+    },
+    "updateStrategy": {
+      "type": "OnDelete"
+    }
+  }
+}

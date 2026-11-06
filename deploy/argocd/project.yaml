@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: sdm-lab
+  namespace: argocd
+spec:
+  description: Standalone SDM lab in the existing sdm-lab namespace
+  sourceRepos:
+    - https://github.com/hklier/sdm-K8s.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: sdm-lab
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: apps
+      kind: StatefulSet
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: PersistentVolumeClaim
+    - group: networking.k8s.io
+      kind: NetworkPolicy

@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sdm-lab
+  namespace: argocd
+# No cascading deletion finalizer is added for this initial adoption.
+spec:
+  project: sdm-lab
+  source:
+    repoURL: https://github.com/hklier/sdm-K8s.git
+    targetRevision: main
+    path: deploy/kubernetes/lab
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sdm-lab
+  syncPolicy:
+    # Initial sync is manual. No automatic pruning or self-healing.
+    syncOptions:
+      - ServerSideApply=true
+      - ClientSideApplyMigration=false
+      - FailOnSharedResource=true
