@@ -112,10 +112,23 @@ EOF
 (umask 022; SDM_HEADLESS_OPENSSL_PATH=/opt/sdm-headless-tools SDM_CERT_HOSTNAME=sdm-kubevirt ./setup.sh --headless /root/sdm-setup.properties)
 test -f /opt/AcmePacket/setup_config.ini
 chown -R nncentral:nncentral /opt/AcmePacket
+install -d -m 755 /usr/local/libexec
+cat > /usr/local/libexec/sdm-wait-ready <<'EOF'
+#!/bin/bash
+for attempt in $(seq 1 72); do
+    if curl --silent --fail --insecure --max-time 5 https://127.0.0.1:8443/ -o /dev/null; then
+        exit 0
+    fi
+    sleep 5
+done
+echo 'SDM HTTPS did not become ready within the startup window.' >&2
+exit 1
+EOF
+chmod 755 /usr/local/libexec/sdm-wait-ready
 cat > /etc/systemd/system/sdm.service <<'EOF'
 [Unit]
 Description=Oracle Communications Session Delivery Manager lab
-After=network-online.target cloud-final.service
+After=network-online.target
 Wants=network-online.target
 
 [Service]
@@ -127,13 +140,15 @@ WorkingDirectory=/opt/AcmePacket/NNC90_5/bin
 Environment=LANG=en_US.UTF-8
 LimitNOFILE=65536
 ExecStart=/bin/bash /opt/AcmePacket/NNC90_5/bin/startnnc.sh --nomonitor
-ExecStop=/bin/bash /opt/AcmePacket/NNC90_5/bin/shutdownnnc.sh
-TimeoutStartSec=180
-TimeoutStopSec=180
+ExecStartPost=/usr/local/libexec/sdm-wait-ready
+ExecStop=/bin/bash /opt/AcmePacket/NNC90_5/bin/shutdownnnc.sh -local
+TimeoutStartSec=480
+TimeoutStopSec=150
 
 [Install]
 WantedBy=multi-user.target
 EOF
+chmod 644 /etc/systemd/system/sdm.service
 systemctl daemon-reload
 systemctl enable --now sdm
 touch /root/sdm-install-complete
