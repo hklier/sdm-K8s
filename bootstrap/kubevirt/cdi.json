@@ -1,0 +1,17 @@
+{
+  "apiVersion": "cdi.kubevirt.io/v1beta1",
+  "kind": "CDI",
+  "metadata": {
+    "name": "cdi"
+  },
+  "spec": {
+    "config": {
+      "filesystemOverhead": {
+        "global": "0.055",
+        "storageClass": {
+          "sdm-kubevirt-local": "0"
+        }
+      }
+    }
+  }
+}

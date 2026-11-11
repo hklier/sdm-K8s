@@ -1,0 +1,42 @@
+{
+  "apiVersion": "v1",
+  "kind": "PersistentVolume",
+  "metadata": {
+    "name": "sdm-kubevirt-scratch"
+  },
+  "spec": {
+    "capacity": {
+      "storage": "100Gi"
+    },
+    "volumeMode": "Filesystem",
+    "accessModes": [
+      "ReadWriteOnce"
+    ],
+    "persistentVolumeReclaimPolicy": "Retain",
+    "storageClassName": "sdm-kubevirt-local",
+    "local": {
+      "path": "/var/lib/sdm-kubevirt/sdm-scratch"
+    },
+    "claimRef": {
+      "namespace": "sdm-lab",
+      "name": "sdm-os-scratch"
+    },
+    "nodeAffinity": {
+      "required": {
+        "nodeSelectorTerms": [
+          {
+            "matchExpressions": [
+              {
+                "key": "kubernetes.io/hostname",
+                "operator": "In",
+                "values": [
+                  "k8s-worker1"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

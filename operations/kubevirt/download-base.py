@@ -11,6 +11,16 @@ url = 'https://yum.oracle.com/templates/OracleLinux/OL9/u7/x86_64/OL9U7_x86_64-k
 root = Path('/home/hkl/sdm-kubevirt/cache')
 root.mkdir(mode=0o700, exist_ok=True)
 target = root / 'OL9U7_x86_64-kvm-b269.qcow2'
+expected = '88c75cf913a66227e9ce74b0087ecac4cce1883f3e5649082e982d0d00310f1c'
+if target.exists():
+    digest = hashlib.sha256()
+    with target.open('rb') as file:
+        for data in iter(lambda: file.read(1024 * 1024), b''):
+            digest.update(data)
+    if digest.hexdigest() != expected:
+        raise RuntimeError('Existing cached image checksum does not match the verified lab image')
+    print('Verified Oracle image is already cached.')
+    raise SystemExit(0)
 with urllib.request.urlopen(urllib.request.Request(url, method='HEAD'), timeout=30) as response:
     size = int(response.headers['Content-Length'])
     etag = response.headers.get('ETag')
@@ -60,6 +70,8 @@ digest = hashlib.sha256()
 with partial.open('rb') as file:
     for data in iter(lambda: file.read(1024 * 1024), b''):
         digest.update(data)
+if digest.hexdigest() != expected:
+    raise RuntimeError('Downloaded image differs from the previously verified lab image; review before using it')
 partial.rename(target)
 target.with_suffix('.source.json').write_text(json.dumps({'url': url, 'bytes': size, 'etag': etag, 'sha256': digest.hexdigest()}, indent=2))
 print('Official Oracle image staged; SHA256:', digest.hexdigest(), flush=True)

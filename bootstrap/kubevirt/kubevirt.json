@@ -1,0 +1,17 @@
+{
+  "apiVersion": "kubevirt.io/v1",
+  "kind": "KubeVirt",
+  "metadata": {
+    "name": "kubevirt",
+    "namespace": "kubevirt"
+  },
+  "spec": {
+    "workloads": {
+      "nodePlacement": {
+        "nodeSelector": {
+          "kubernetes.io/hostname": "k8s-worker1"
+        }
+      }
+    }
+  }
+}
