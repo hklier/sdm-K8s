@@ -16,7 +16,7 @@ dnf install -y --exclude='oraclelinux-release*' \
     libstdc++ zlib unixODBC libXtst libXi libXrender alsa-lib fontconfig \
     freetype net-tools iproute procps-ng hostname sudo shadow-utils tar gzip \
     unzip which findutils util-linux openssh-clients iputils glibc-langpack-en \
-    chrony net-snmp-utils
+    chrony net-snmp-utils python3-requests
 localectl set-locale LANG=en_US.UTF-8
 export LANG=en_US.UTF-8
 systemctl enable --now chronyd

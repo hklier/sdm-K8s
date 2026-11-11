@@ -5,7 +5,8 @@
     "name": "sdm",
     "namespace": "sdm-lab",
     "annotations": {
-      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false",
+      "sdm.lab/base-image-url": "https://yum.oracle.com/templates/OracleLinux/OL9/u7/x86_64/OL9U7_x86_64-kvm-b269.qcow2"
     }
   },
   "spec": {
@@ -21,9 +22,7 @@
         },
         "spec": {
           "source": {
-            "http": {
-              "url": "https://yum.oracle.com/templates/OracleLinux/OL9/u7/x86_64/OL9U7_x86_64-kvm-b269.qcow2"
-            }
+            "upload": {}
           },
           "storage": {
             "storageClassName": "sdm-kubevirt-local",
