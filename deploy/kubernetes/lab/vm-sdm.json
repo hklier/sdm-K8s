@@ -1,0 +1,117 @@
+{
+  "apiVersion": "kubevirt.io/v1",
+  "kind": "VirtualMachine",
+  "metadata": {
+    "name": "sdm",
+    "namespace": "sdm-lab",
+    "annotations": {
+      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+    }
+  },
+  "spec": {
+    "runStrategy": "Always",
+    "dataVolumeTemplates": [
+      {
+        "metadata": {
+          "name": "sdm-os",
+          "annotations": {
+            "cdi.kubevirt.io/storage.bind.immediate.requested": "true",
+            "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+          }
+        },
+        "spec": {
+          "source": {
+            "http": {
+              "url": "https://yum.oracle.com/templates/OracleLinux/OL9/u7/x86_64/OL9U7_x86_64-kvm-b269.qcow2"
+            }
+          },
+          "storage": {
+            "storageClassName": "sdm-kubevirt-local",
+            "volumeName": "sdm-kubevirt-os",
+            "accessModes": [
+              "ReadWriteOnce"
+            ],
+            "volumeMode": "Filesystem",
+            "resources": {
+              "requests": {
+                "storage": "100Gi"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "template": {
+      "metadata": {
+        "labels": {
+          "app": "sdm"
+        }
+      },
+      "spec": {
+        "nodeSelector": {
+          "kubernetes.io/hostname": "k8s-worker1"
+        },
+        "terminationGracePeriodSeconds": 180,
+        "domain": {
+          "cpu": {
+            "cores": 4,
+            "sockets": 1,
+            "threads": 1
+          },
+          "memory": {
+            "guest": "24Gi"
+          },
+          "resources": {
+            "requests": {
+              "cpu": "4",
+              "memory": "24Gi"
+            }
+          },
+          "devices": {
+            "disks": [
+              {
+                "name": "rootdisk",
+                "disk": {
+                  "bus": "virtio"
+                }
+              },
+              {
+                "name": "cloudinit",
+                "disk": {
+                  "bus": "virtio"
+                }
+              }
+            ],
+            "interfaces": [
+              {
+                "name": "default",
+                "masquerade": {},
+                "model": "virtio"
+              }
+            ]
+          }
+        },
+        "networks": [
+          {
+            "name": "default",
+            "pod": {}
+          }
+        ],
+        "volumes": [
+          {
+            "name": "rootdisk",
+            "dataVolume": {
+              "name": "sdm-os"
+            }
+          },
+          {
+            "name": "cloudinit",
+            "cloudInitNoCloud": {
+              "userData": "#cloud-config\nhostname: sdm-kubevirt\nmanage_etc_hosts: true\nusers:\n  - default\n  - name: hkl\n    groups: [wheel]\n    sudo: ALL=(ALL) NOPASSWD:ALL\n    shell: /bin/bash\n    lock_passwd: true\n    ssh_authorized_keys:\n      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQj70FXTut4zPThcfoBdDAjvPyvC7xJ1tXisu1yUmesX2zxRghCbpjdYYSIbvTZdd88UMCAOdqo1nbSQEEM8Y9fKtd0Q8cdFrLSX/zyyVo4+QDPSS6Jz8jmv2t6FhRkNNQlczqVGsJN6mCIwavdjncN8Q+26tYulE6mHPqhP6FcbqJJTXwrDnotvf2TW3eKqXpep1L9HrW4Cutmk0Dbst3jYRngTIOo/Mn+X/wP39lJaxaFdvkWjHbODE4nznmhyd9AWzUMky5qgNIJGy0siPyNbFaS9gBHAzRxiNatfQjvcLIsLu6IMA4lMioG/96pxzDw/Kx4LkyAFBTMYqxeXZZ hkl-sdm-kubevirt\nssh_pwauth: false\ndisable_root: true\nwrite_files:\n  - path: /etc/dnf/dnf.conf.d-sdm-note\n    content: |\n      Lab deployment targets Oracle Linux 9.7; do not run an unattended OS upgrade.\nruncmd:\n  - [ sh, -c, 'dnf install -y --exclude=oraclelinux-release* qemu-guest-agent > /var/log/sdm-guest-agent-install.log 2>&1 && systemctl enable --now qemu-guest-agent' ]\n"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

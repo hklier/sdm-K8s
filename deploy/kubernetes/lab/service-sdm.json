@@ -1,0 +1,39 @@
+{
+  "apiVersion": "v1",
+  "kind": "Service",
+  "metadata": {
+    "name": "sdm",
+    "namespace": "sdm-lab",
+    "annotations": {
+      "metallb.io/loadBalancerIPs": "192.168.0.240",
+      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+    }
+  },
+  "spec": {
+    "type": "LoadBalancer",
+    "externalTrafficPolicy": "Local",
+    "selector": {
+      "app": "sdm"
+    },
+    "ports": [
+      {
+        "name": "ssh",
+        "protocol": "TCP",
+        "port": 22,
+        "targetPort": 22
+      },
+      {
+        "name": "https",
+        "protocol": "TCP",
+        "port": 8443,
+        "targetPort": 8443
+      },
+      {
+        "name": "snmp-traps",
+        "protocol": "UDP",
+        "port": 162,
+        "targetPort": 162
+      }
+    ]
+  }
+}

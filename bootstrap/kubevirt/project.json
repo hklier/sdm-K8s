@@ -1,0 +1,43 @@
+{
+  "apiVersion": "argoproj.io/v1alpha1",
+  "kind": "AppProject",
+  "metadata": {
+    "name": "sdm-lab",
+    "namespace": "argocd"
+  },
+  "spec": {
+    "description": "Standalone SDM KubeVirt lab",
+    "sourceRepos": [
+      "https://github.com/hklier/sdm-K8s.git"
+    ],
+    "destinations": [
+      {
+        "namespace": "sdm-lab",
+        "server": "https://kubernetes.default.svc"
+      }
+    ],
+    "clusterResourceWhitelist": [],
+    "namespaceResourceWhitelist": [
+      {
+        "group": "kubevirt.io",
+        "kind": "VirtualMachine"
+      },
+      {
+        "group": "cdi.kubevirt.io",
+        "kind": "DataVolume"
+      },
+      {
+        "group": "",
+        "kind": "PersistentVolumeClaim"
+      },
+      {
+        "group": "",
+        "kind": "Service"
+      },
+      {
+        "group": "networking.k8s.io",
+        "kind": "NetworkPolicy"
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "apiVersion": "argoproj.io/v1alpha1",
+  "kind": "Application",
+  "metadata": {
+    "name": "sdm-lab",
+    "namespace": "argocd"
+  },
+  "spec": {
+    "project": "sdm-lab",
+    "source": {
+      "repoURL": "https://github.com/hklier/sdm-K8s.git",
+      "targetRevision": "main",
+      "path": "deploy/kubernetes/lab"
+    },
+    "destination": {
+      "server": "https://kubernetes.default.svc",
+      "namespace": "sdm-lab"
+    },
+    "syncPolicy": {
+      "syncOptions": [
+        "ServerSideApply=true",
+        "ClientSideApplyMigration=false",
+        "FailOnSharedResource=true"
+      ]
+    }
+  }
+}

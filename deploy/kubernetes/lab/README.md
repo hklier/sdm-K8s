@@ -1,5 +1,11 @@
-# SDM container deployment retired
+# SDM on KubeVirt
 
-The container-based SDM lab was removed on 11 November 2026 in preparation for a KubeVirt VM deployment. This Kustomize directory intentionally deploys no resources. Previous manifests are retained under `archive/container-lab-retired-20261111/` for reference; do not apply them as part of the replacement.
+One Oracle Linux 9.7 VM running SDM 9.0.5 on worker1, with 4 vCPUs, 24 GiB RAM and a persistent 100 GiB OS disk. This reduced disk size is an explicit lab choice.
 
-The old application data is retained separately on worker1 for recovery. No credentials or application data are stored in this archive.
+Access: SSH `hkl@192.168.0.240` with the existing hkl key, and HTTPS `https://192.168.0.240:8443/`. The management-network ingress policy permits 192.168.0.0/22. Root Linux access uses `sudo`; SSH passwords/root login are disabled.
+
+The VM and Service are managed by Argo CD. SDM installation and application upgrades happen inside the VM; changing a Git manifest does not reinstall or upgrade SDM. VM data is retained; automatic pruning is disabled.
+
+Infrastructure bootstrap manifests are in `bootstrap/kubevirt/`. KubeVirt v1.9.1 and CDI v1.66.1 are installed from their official release operator manifests. The dedicated 300 GiB worker1 disk is mounted by UUID at `/var/lib/sdm-kubevirt`; the VM volume is `/var/lib/sdm-kubevirt/sdm-os`. The VM is pinned to worker1 and does not provide HA or live migration.
+
+Vendor installation media and credentials must not be committed to Git. Credentials are held inside the VM at `/root/sdm-lab-credentials.txt`, readable with sudo. Service control: `sudo systemctl status sdm`. Previous container manifests are archived under `archive/container-lab-retired-20261111/`.
