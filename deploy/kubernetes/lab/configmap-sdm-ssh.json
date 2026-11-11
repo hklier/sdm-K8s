@@ -1,0 +1,16 @@
+{
+  "apiVersion": "v1",
+  "kind": "ConfigMap",
+  "metadata": {
+    "name": "sdm-ssh",
+    "namespace": "sdm-lab",
+    "annotations": {
+      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+    }
+  },
+  "data": {
+    "start-ssh.sh": "#!/bin/bash\nset -Eeuo pipefail\nstate=/opt/AcmePacket/.lab-ssh\ninstall -d -m 755 \"$state\" /run/sshd\ninstall -d -m 700 \"$state/hostkeys\"\ninstall -m 644 /opt/sdm-ssh/authorized_keys \"$state/authorized_keys\"\nif [ ! -f \"$state/hostkeys/ssh_host_ed25519_key\" ]; then\n    ssh-keygen -q -t ed25519 -N '' -f \"$state/hostkeys/ssh_host_ed25519_key\"\nfi\n/usr/sbin/sshd -t -f /opt/sdm-ssh/sshd_config\n/usr/sbin/sshd -f /opt/sdm-ssh/sshd_config -E \"$state/sshd.log\"\n",
+    "sshd_config": "Port 22\nListenAddress 0.0.0.0\nHostKey /opt/AcmePacket/.lab-ssh/hostkeys/ssh_host_ed25519_key\nPidFile /run/sshd-sdm.pid\nAuthorizedKeysFile /opt/AcmePacket/.lab-ssh/authorized_keys\nAllowUsers nncentral\nPermitRootLogin no\nPubkeyAuthentication yes\nAuthenticationMethods publickey\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nUsePAM no\nStrictModes yes\nPermitEmptyPasswords no\nDisableForwarding yes\nPermitTTY yes\nPrintMotd no\nSubsystem sftp internal-sftp\n",
+    "authorized_keys": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQj70FXTut4zPThcfoBdDAjvPyvC7xJ1tXisu1yUmesX2zxRghCbpjdYYSIbvTZdd88UMCAOdqo1nbSQEEM8Y9fKtd0Q8cdFrLSX/zyyVo4+QDPSS6Jz8jmv2t6FhRkNNQlczqVGsJN6mCIwavdjncN8Q+26tYulE6mHPqhP6FcbqJJTXwrDnotvf2TW3eKqXpep1L9HrW4Cutmk0Dbst3jYRngTIOo/Mn+X/wP39lJaxaFdvkWjHbODE4nznmhyd9AWzUMky5qgNIJGy0siPyNbFaS9gBHAzRxiNatfQjvcLIsLu6IMA4lMioG/96pxzDw/Kx4LkyAFBTMYqxeXZZ hkl-sdm-lab\n"
+  }
+}

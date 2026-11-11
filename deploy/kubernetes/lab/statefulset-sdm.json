@@ -36,7 +36,7 @@
         "containers": [
           {
             "args": [
-              "set -e\nulimit -n 65536\necho \"Open-file soft limit: $(ulimit -Sn)\"\nexec /usr/local/bin/sdm-entrypoint\n"
+              "set -e\nulimit -n 65536\necho \"Open-file soft limit: $(ulimit -Sn)\"\n/bin/bash /opt/sdm-ssh/start-ssh.sh\nexec /usr/local/bin/sdm-entrypoint\n"
             ],
             "command": [
               "/bin/bash",
@@ -55,6 +55,11 @@
                 "containerPort": 162,
                 "name": "snmp-traps",
                 "protocol": "UDP"
+              },
+              {
+                "containerPort": 22,
+                "name": "ssh",
+                "protocol": "TCP"
               }
             ],
             "readinessProbe": {
@@ -111,6 +116,11 @@
                 "name": "setup",
                 "readOnly": true,
                 "subPath": "sdm_setup"
+              },
+              {
+                "name": "ssh-config",
+                "mountPath": "/opt/sdm-ssh",
+                "readOnly": true
               }
             ]
           }
@@ -138,6 +148,13 @@
             "secret": {
               "defaultMode": 256,
               "secretName": "sdm-setup"
+            }
+          },
+          {
+            "name": "ssh-config",
+            "configMap": {
+              "name": "sdm-ssh",
+              "defaultMode": 292
             }
           }
         ]

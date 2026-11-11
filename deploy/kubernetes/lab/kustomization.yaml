@@ -7,3 +7,6 @@ resources:
   - persistentvolumeclaim-sdm-data.json
   - networkpolicy-sdm-isolated.json
   - networkpolicy-sdm-device-egress.json
+
+  - configmap-sdm-ssh.json
+  - networkpolicy-sdm-ssh-ingress.json

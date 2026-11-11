@@ -36,6 +36,12 @@
         "port": 162,
         "protocol": "UDP",
         "targetPort": "snmp-traps"
+      },
+      {
+        "name": "ssh",
+        "port": 22,
+        "protocol": "TCP",
+        "targetPort": "ssh"
       }
     ],
     "selector": {

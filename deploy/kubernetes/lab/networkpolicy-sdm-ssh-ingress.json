@@ -1,0 +1,38 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "NetworkPolicy",
+  "metadata": {
+    "name": "sdm-ssh-ingress",
+    "namespace": "sdm-lab",
+    "annotations": {
+      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+    }
+  },
+  "spec": {
+    "podSelector": {
+      "matchLabels": {
+        "app": "sdm"
+      }
+    },
+    "policyTypes": [
+      "Ingress"
+    ],
+    "ingress": [
+      {
+        "from": [
+          {
+            "ipBlock": {
+              "cidr": "192.168.0.0/22"
+            }
+          }
+        ],
+        "ports": [
+          {
+            "protocol": "TCP",
+            "port": 22
+          }
+        ]
+      }
+    ]
+  }
+}
